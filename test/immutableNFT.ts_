@@ -1,0 +1,27 @@
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+
+describe('ImmutableNFT', function () {
+  it('Should mint one token for user', async function () {
+    const [owner, letItBeIMX, user] = await ethers.getSigners();
+
+    const ImmutableNFT = await ethers.getContractFactory('ImmutableNFT');
+    const immutableNFT = await ImmutableNFT.deploy(owner.address, 'IMXNFT', 'IMXNFT', letItBeIMX.address);
+    await immutableNFT.deployed();
+
+    // In some reason it doesn't work with strings
+    // But any way here I've got an error..
+
+    // Error: VM Exception while processing transaction:
+    // reverted with panic code 0x11
+    // (Arithmetic operation underflowed or overflowed outside of an unchecked block)
+    await immutableNFT
+      .connect(letItBeIMX)
+      // eslint-disable-next-line node/no-deprecated-api
+      .mintFor(user.address, 1, Buffer.from(':'));
+
+    const userBalance = await immutableNFT.balanceOf(user.address);
+
+    expect(userBalance.toString()).to.equal('1');
+  });
+});
